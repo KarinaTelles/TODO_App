@@ -75,7 +75,8 @@ public class AnthropicChatModel(AnthropicClient client, IOptions<AgentOptions> o
         "low" => Effort.Low,
         "high" => Effort.High,
         "max" => Effort.Max,
-        _ => Effort.Medium,
+        "medium" => Effort.Medium,
+        _ => throw new InvalidOperationException($"Agent:Effort inválido: '{value}'. Use low, medium, high ou max."),
     };
 
     private static ToolUnion ToSdkTool(ToolDefinition t)
