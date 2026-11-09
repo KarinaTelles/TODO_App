@@ -74,8 +74,10 @@ function formatDate(iso: string) {
       </div>
       <p v-if="task.notes" class="notes">{{ task.notes }}</p>
       <div class="row buttons">
-        <button type="button" class="link" @click="startEdit">Editar<span class="visually-hidden"> {{ task.title }}</span></button>
-        <button type="button" class="link danger" @click="emit('remove', task)">Excluir<span class="visually-hidden"> {{ task.title }}</span></button>
+        <button type="button" class="link" :aria-label="`Editar ${task.title}`" @click="startEdit">Editar</button>
+        <button type="button" class="link danger" :aria-label="`Excluir ${task.title}`" @click="emit('remove', task)">
+          Excluir
+        </button>
       </div>
     </template>
   </li>
