@@ -1,0 +1,7 @@
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/*.db
+web
+e2e
