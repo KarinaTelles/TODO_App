@@ -60,13 +60,23 @@ public class ActionService(AppDbContext db, ToolExecutor executor, AgentRunner r
             return new(ResolutionOutcome.AlreadyResolved, PendingActionDto.From(current));
         }
 
-        var execution = await executor.ExecuteAsync(action, ct);
+        Execution execution;
+        try
+        {
+            execution = await executor.ExecuteAsync(action, ct);
+        }
+        catch (Exception)
+        {
+            // The executor's transaction rolled back. Record the failure so the
+            // action does not stay "executed" without a result.
+            execution = new(ActionStatus.Failed, new { status = "failed", message = "A ação falhou e nada foi alterado." });
+        }
         var isError = execution.Status != ActionStatus.Executed;
         await db.PendingActions
             .Where(a => a.Id == id)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(a => a.Status, execution.Status)
-                .SetProperty(a => a.ResultJson, ResultJson(action, execution.Payload, isError)), ct);
+                .SetProperty(a => a.ResultJson, ResultJson(action, execution.Payload, isError)), CancellationToken.None);
 
         var updated = await db.PendingActions.AsNoTracking().FirstAsync(a => a.Id == id, ct);
         var resumed = await runner.ResumeIfReadyAsync(action.ConversationId, ct);
